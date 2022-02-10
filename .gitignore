@@ -1,0 +1,6 @@
+# Idea Project
+.idea/
+
+# Python
+__pycache__
+# The current virtual enviorment config is located outside of the project, no need to ignore.
