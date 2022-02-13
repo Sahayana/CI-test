@@ -129,3 +129,13 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+
+# separate producion enviornment setting
+# it would overwrite contents, Database info in this case, if local_settings.py is located in local directory.
+# It should come to the end for overwriting.
+try:
+    from sparta.local_settings import *
+except ImportError:
+    pass
