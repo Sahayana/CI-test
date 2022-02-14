@@ -1,14 +1,12 @@
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 
 from tabom.models.article import Article
 from tabom.models.like import Like
 from tabom.models.user import User
-from tabom.services.article_service import (
-    get_an_article,
-    get_article_list,
-    get_article_page,
-)
-from tabom.services.like_service import do_like, undo_like
+from tabom.services.article_service import *
+from tabom.services.like_service import *
 
 
 class TestArticleService(TestCase):
@@ -32,32 +30,35 @@ class TestArticleService(TestCase):
         with self.assertRaises(Article.DoesNotExist):
             get_an_article(invalid_article_id)
 
-    def test_get_article_list_should_prefetch_liket(self) -> None:
+    def test_get_article_list_should_prefetch_like(self) -> None:
         # Given
         user = User.objects.create(name="test_user")
         articles = [Article.objects.create(title=f"{i}") for i in range(1, 21)]
         do_like(user.id, articles[-1].id)
 
         # When
-        result_articles = get_article_list(0, 10)
+        # with CaptureQueriesContext(connection) as ctx:
+        with self.assertNumQueries(2):
+            result_articles = get_article_list(0, 10)
+            result_counts = [article.like_set.count() for article in result_articles]
 
-        # Then
-        self.assertEqual(len(result_articles), 10)
-        self.assertEqual(1, result_articles[0].like_set.count())
-        self.assertEqual(
-            [article.id for article in reversed(articles[10:21])], [article.id for article in result_articles]
-        )
+            # Then
+            self.assertEqual(len(result_articles), 10)
+            self.assertEqual(1, result_counts[0])
+            self.assertEqual(
+                [article.id for article in reversed(articles[10:21])], [article.id for article in result_articles]
+            )
 
-    def test_get_article_page(self) -> None:
-        # Given
-        user = User.objects.create(name="test_user")
-        articles = [Article.objects.create(title=f"{i}") for i in range(1, 21)]
-        do_like(user.id, articles[-1].id)
+    # def test_get_article_page(self) -> None:
+    #     # Given
+    #     user = User.objects.create(name="test_user")
+    #     articles = [Article.objects.create(title=f"{i}") for i in range(1, 21)]
+    #     do_like(user.id, articles[-1].id)
 
-        # When
-        result_articles = get_article_page(1, 10)
+    #     # When
+    #     result_articles = get_article_page(1, 10)
 
-        # Then
-        self.assertEqual(len(result_articles), 10)
-        self.assertEqual(1, result_articles[0].like_set.count())
-        self.assertEqual([a.id for a in reversed(articles[10:21])], [a.id for a in result_articles])
+    #     # Then
+    #     self.assertEqual(len(result_articles), 10)
+    #     self.assertEqual(1, result_articles[0].like_set.count())
+    #     self.assertEqual([a.id for a in reversed(articles[10:21])], [a.id for a in result_articles])
