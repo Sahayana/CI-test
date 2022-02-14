@@ -38,16 +38,14 @@ class TestArticleService(TestCase):
 
         # When
         # with CaptureQueriesContext(connection) as ctx:
-        with self.assertNumQueries(2):
-            result_articles = get_article_list(0, 10)
+        with self.assertNumQueries(3):
+            result_articles = get_article_list(user.id, 0, 10)
             result_counts = [article.like_set.count() for article in result_articles]
 
             # Then
             self.assertEqual(len(result_articles), 10)
             self.assertEqual(1, result_counts[0])
-            self.assertEqual(
-                [article.id for article in reversed(articles[10:21])], [article.id for article in result_articles]
-            )
+            self.assertEqual([article.id for article in reversed(articles[10:21])], [article.id for article in result_articles])
 
     # def test_get_article_page(self) -> None:
     #     # Given
@@ -62,3 +60,18 @@ class TestArticleService(TestCase):
     #     self.assertEqual(len(result_articles), 10)
     #     self.assertEqual(1, result_articles[0].like_set.count())
     #     self.assertEqual([a.id for a in reversed(articles[10:21])], [a.id for a in result_articles])
+
+
+    def test_get_article_list_should_contain_my_like_when_like_exists(self) -> None:
+        # Given
+        user = User.objects.create(name="test_user")
+        article1 = Article.objects.create(title="artice1")
+        like = do_like(user.id, article1.id)
+        Article.objects.create(title="article2")
+
+        # When
+        articles = get_article_list(user.id, 0, 10)
+
+        # Then
+        self.assertEqual(like.id, articles[1].my_likes[0].id)
+        self.assertEqual(0, len(articles[0].my_likes))
