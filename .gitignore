@@ -8,3 +8,9 @@ __pycache__
 sparta/local_settings.py
 
 .github
+
+rullet_generator.py
+rullet_no_generator.py
+async_prac.py
+
+prac/
