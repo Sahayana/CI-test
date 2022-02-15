@@ -8,7 +8,6 @@ from tabom.services.article_service import *
 from tabom.services.like_service import *
 
 
-
 def create_an_article(title: str) -> Article:
     return Article.objects.create(title=title)
 

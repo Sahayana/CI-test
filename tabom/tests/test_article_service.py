@@ -3,10 +3,10 @@ from django.test import TestCase
 from tabom.models import Like, User
 from tabom.models.article import Article
 from tabom.services.article_service import (
+    create_an_article,
     delete_an_article,
     get_an_article,
     get_article_list,
-    create_an_article,
 )
 from tabom.services.like_service import do_like
 
@@ -106,7 +106,6 @@ class TestArticleService(TestCase):
         # Then
         self.assertFalse(Article.objects.filter(id=article.id).exists())
         self.assertFalse(Like.objects.filter(id=like.id).exists())
-
 
     def test_you_can_create_an_artice(self) -> None:
         # Given

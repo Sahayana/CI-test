@@ -1,7 +1,9 @@
+from typing import List, Optional
 
-from typing import Optional, List
 from ninja import Schema
+
 from tabom.apis.v1.schemas.like_response import LikeResponse
+
 
 class ArticleResponse(Schema):
     id: int
