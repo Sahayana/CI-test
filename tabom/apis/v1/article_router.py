@@ -3,6 +3,7 @@ from typing import List, Tuple
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from ninja import Router
+from ninja.errors import HttpError
 
 from tabom.apis.v1.schemas.article_create_request import ArticleCreateRequest
 from tabom.apis.v1.schemas.article_response import ArticleResponse
@@ -33,7 +34,10 @@ def get_articles(request: HttpRequest, user_id: int, offset: int = 0, limit: int
 
 @router.get("/{article_id}", response=ArticleResponse)
 def get_article(request: HttpRequest, user_id: int, article_id: int) -> Article:
-    article = get_an_article(user_id, article_id)
+    try:
+        article = get_an_article(user_id, article_id)
+    except Article.DoesNotExist:
+        raise HttpError(404, f"Article #{article_id} Not Found")
     return article
 
 
